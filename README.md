@@ -1,4 +1,4 @@
-# pymalignploter
+# pymsaploter
 Usage:<br>
  cd example<br>
  cat demo.sh<br>
