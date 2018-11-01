@@ -1,3 +1,4 @@
-muscle_x64 -in genes.fa -out genes.muscle.clwstrict.aln -clwstrict
-python ../multi_alignment.ploter.py genes.muscle.clwstrict.aln aln nuc
-convert -density 100 out.multil.svg out.multil.png
+#muscle_x64 -in genes.fa -out genes.muscle.clwstrict.aln -clwstrict
+pre=out
+python ../multi_alignment.ploter.py plot --align genes.muscle.clwstrict.aln --formats aln --types nuc --prefix $pre
+convert  $pre.svg $pre.png

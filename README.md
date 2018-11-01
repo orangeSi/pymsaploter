@@ -3,7 +3,7 @@ Usage:<br>
  cd example<br>
  cat demo.sh<br>
 
-![alt text](example/out.multil.png)
+![alt text](example/out.svg)
 <br>
 
 TODO:<br>
