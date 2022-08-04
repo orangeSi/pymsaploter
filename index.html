@@ -219,9 +219,9 @@ LKNHGYT-------KDFVKALNSPFGYNIPRFKNLSIEQLFDR--NEYLTEK--------
 <input type="button" onclick="plot_msa()" value="Plot!" />
  
 <br><br>
-<input type="button" onclick="plot_jump_to_x(1)" value="(msa mastrix coordinate)jump to" /> <input type="number" id="jump_pos_start" /><text>bp</text>
+<input type="button" onclick="plot_jump_to_x(1)" value="(msa mastrix coordinate)jump to" /> <input type="number" id="jump_pos_start" value="1" /><text>bp</text>
 <br><br>
-<input type="button" onclick="plot_jump_to_x(2)" value="(first sequence as template coordinate)jump to" /> <input type="number" id="jump_pos_start2" /><text>bp</text>
+<input type="button" onclick="plot_jump_to_x(2)" value="(first sequence as template coordinate)jump to" /> <input type="number" id="jump_pos_start2" value="10" /><text>bp</text>
 <br><br>
 <input type="button" onclick="plot_msa()" value="set margin of sequence name region" /> <input type="number" id="seq_name_left_margin" value="200" /><text>px</text>
 
@@ -245,9 +245,9 @@ function plot_jump_to_x(e){
 	
 	if(e == 1){ // msa坐标
 		console.log(window.layout.xaxis.range);
-		xstart = document.getElementById("jump_pos_start").value; // 输入感兴趣的区域在msa中起始点坐标
+		xstart = parseInt(document.getElementById("jump_pos_start").value); // 输入感兴趣的区域在msa中起始点坐标
 	}else if(e == 2){ // template序列的实际坐标
-		xstart = document.getElementById("jump_pos_start2").value; // 输入感兴趣的区域在msa中起始点坐标
+		xstart = parseInt(document.getElementById("jump_pos_start2").value); // 输入感兴趣的区域在msa中起始点坐标
 		xstart = pos_from_seq_to_msa[xstart];
 	}else{
 		alert("error: not support plot_jump_to_x for"+e);
@@ -340,7 +340,7 @@ function plot_msa(){
 	
 	// 定义 pos_from_seq_to_msa
 	for(var i=0; i< template_seq.length; i++){
-		var real_i = template_seq.slice(0,i+1).replaceAll("-", "").length
+		var real_i = template_seq.slice(0,i+1).replaceAll("-", "").length;
 		if(pos_from_seq_to_msa.hasOwnProperty(real_i)){continue}
 		pos_from_seq_to_msa[real_i] = i;
 	}
