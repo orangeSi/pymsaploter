@@ -1,13 +1,16 @@
 <html>
 <head>
 	<!-- Load plotly.js into the DOM -->
-	<script src='https://cdn.plot.ly/plotly-2.12.1.min.js'></script>
-	<!--<script src='./plotly-2.12.1.min.js'></script> -->
+	<!--<script src='https://cdn.plot.ly/plotly-2.12.1.min.js'></script> -->
+	<script src='./plotly-2.12.1.min.js'></script>
 	
 	<!-- 
 	ChangeLog:
-		2022-07-14:
-	
+		2022-08-04:
+
+        todo:
+		 1.蛋白全长水平的domain regeion 区域 或者 template蛋白的二级结构注释(来自https://hub.0z.gs/YuLab-SMU/ggmsa/issues/47)
+		 2.输入一小段蛋白序列(支持js的正则表达式)，在template中搜索和定位这段序列的位置，比如在5个不同位置都搜索到这段序列，则把这5个位置作为一个新的track data展示（相当在整个蛋白长度水平上高亮这5个位置），同时也展示这5个位置的信息作为一列（5行），每行表示一个match的位置都可以点击后使用plot_jump_to_x()函数和起始位置坐标 来跳转到对应的match区域。
 	-->
 </head>
 
@@ -219,9 +222,9 @@ LKNHGYT-------KDFVKALNSPFGYNIPRFKNLSIEQLFDR--NEYLTEK--------
 <input type="button" onclick="plot_msa()" value="Plot!" />
  
 <br><br>
-<input type="button" onclick="plot_jump_to_x(1)" value="(msa mastrix coordinate)jump to" /> <input type="number" id="jump_pos_start" value="1" /><text>bp</text>
+<input type="button" onclick="plot_jump_to_x(1)" value="(msa mastrix coordinate)jump to" /> <input type="number" id="jump_pos_start" /><text>bp</text>
 <br><br>
-<input type="button" onclick="plot_jump_to_x(2)" value="(first sequence as template coordinate)jump to" /> <input type="number" id="jump_pos_start2" value="10" /><text>bp</text>
+<input type="button" onclick="plot_jump_to_x(2)" value="(first sequence as template coordinate)jump to" /> <input type="number" id="jump_pos_start2" /><text>bp</text>
 <br><br>
 <input type="button" onclick="plot_msa()" value="set margin of sequence name region" /> <input type="number" id="seq_name_left_margin" value="200" /><text>px</text>
 
@@ -245,9 +248,9 @@ function plot_jump_to_x(e){
 	
 	if(e == 1){ // msa坐标
 		console.log(window.layout.xaxis.range);
-		xstart = parseInt(document.getElementById("jump_pos_start").value); // 输入感兴趣的区域在msa中起始点坐标
+		xstart = document.getElementById("jump_pos_start").value; // 输入感兴趣的区域在msa中起始点坐标
 	}else if(e == 2){ // template序列的实际坐标
-		xstart = parseInt(document.getElementById("jump_pos_start2").value); // 输入感兴趣的区域在msa中起始点坐标
+		xstart = document.getElementById("jump_pos_start2").value; // 输入感兴趣的区域在msa中起始点坐标
 		xstart = pos_from_seq_to_msa[xstart];
 	}else{
 		alert("error: not support plot_jump_to_x for"+e);
@@ -340,7 +343,7 @@ function plot_msa(){
 	
 	// 定义 pos_from_seq_to_msa
 	for(var i=0; i< template_seq.length; i++){
-		var real_i = template_seq.slice(0,i+1).replaceAll("-", "").length;
+		var real_i = template_seq.slice(0,i+1).replaceAll("-", "").length
 		if(pos_from_seq_to_msa.hasOwnProperty(real_i)){continue}
 		pos_from_seq_to_msa[real_i] = i;
 	}
@@ -664,8 +667,10 @@ function plot_msa_by_plotlyjs(res){
   };
 
 
+	
 
-	// todo: 蛋白全长水平的domain regeion 区域
+
+	// todo: 蛋白全长水平的domain regeion 区域 或者 template蛋白的二级结构注释(来自https://hub.0z.gs/YuLab-SMU/ggmsa/issues/47)
 	var data4 = {
 	x: [0.5, 2, 3, 5, 9.5], // 把蛋白上每个domain实际的区域转化为msa中的坐标！
 	y: [1, 1, 1, 1, 1],
@@ -746,8 +751,7 @@ function plot_msa_by_plotlyjs(res){
  
 
 //data = [data2, data1, data3];
-//data = [data4, data3, data2, data1]; // 最后画data1，这样data1就在data2上方，不会被data2盖住。
-data = [data3, data2, data1 ]; // 最后画data1，这样data1就在data2上方，不会被data2盖住。
+data = [data4, data3, data2, data1]; // 最后画data1，这样data1就在data2上方，不会被data2盖住。
 Plotly.newPlot('myDiv', {data:data, layout:layout}); 
 
 
