@@ -746,7 +746,8 @@ function plot_msa_by_plotlyjs(res){
  
 
 //data = [data2, data1, data3];
-data = [data4, data3, data2, data1]; // 最后画data1，这样data1就在data2上方，不会被data2盖住。
+//data = [data4, data3, data2, data1]; // 最后画data1，这样data1就在data2上方，不会被data2盖住。
+data = [data3, data2, data1 ]; // 最后画data1，这样data1就在data2上方，不会被data2盖住。
 Plotly.newPlot('myDiv', {data:data, layout:layout}); 
 
 
