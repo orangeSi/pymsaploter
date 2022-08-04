@@ -1,8 +1,8 @@
 <html>
 <head>
 	<!-- Load plotly.js into the DOM -->
-	<script src='https://cdn.plot.ly/plotly-2.12.1.min.js'></script>
-	<!--<script src='./plotly-2.12.1.min.js'></script> -->
+	<!--<script src='https://cdn.plot.ly/plotly-2.12.1.min.js'></script> -->
+	<script src='./plotly-2.12.1.min.js'></script>
 	
 	<!-- 
 	ChangeLog:
@@ -219,9 +219,11 @@ LKNHGYT-------KDFVKALNSPFGYNIPRFKNLSIEQLFDR--NEYLTEK--------
 <input type="button" onclick="plot_msa()" value="Plot!" />
  
 <br><br>
-<input type="button" onclick="plot_jump_to_x(1)" value="(msa坐标)jump to" /> <input type="number" id="jump_pos_start" /><text>bp</text>
+<input type="button" onclick="plot_jump_to_x(1)" value="(msa mastrix coordinate)jump to" /> <input type="number" id="jump_pos_start" /><text>bp</text>
 <br><br>
-<input type="button" onclick="plot_jump_to_x(2)" value="(template坐标)jump to" /> <input type="number" id="jump_pos_start2" /><text>bp</text>
+<input type="button" onclick="plot_jump_to_x(2)" value="(first sequence as template coordinate)jump to" /> <input type="number" id="jump_pos_start2" /><text>bp</text>
+<br><br>
+<input type="button" onclick="plot_msa()" value="set margin of sequence name region" /> <input type="number" id="seq_name_left_margin" value="200" /><text>px</text>
 
 
 <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
@@ -605,6 +607,8 @@ function plot_msa_by_plotlyjs(res){
 	var template_pid = res['template_pid'];
 
 
+	//var pseq_name_max_len = 10;
+	var fig_left_margin = parseInt(document.getElementById("seq_name_left_margin").value); // convert string to int by parseInt 
 	//var the_colorscale = [[0.0, 'orange'], [0.037037037037037035, 'orange'], [0.037037037037037035, '#fff'], [0.07407407407407407, '#fff'], [0.07407407407407407, 'green'], [0.1111111111111111, 'green'], [0.1111111111111111, 'red'], [0.14814814814814814, 'red'], [0.14814814814814814, 'red'], [0.18518518518518517, 'red'], [0.18518518518518517, 'blue'], [0.2222222222222222, 'blue'], [0.2222222222222222, 'orange'], [0.25925925925925924, 'orange'], [0.25925925925925924, 'red'], [0.2962962962962963, 'red'], [0.2962962962962963, 'green'], [0.3333333333333333, 'green'], [0.3333333333333333, '#fff'], [0.37037037037037035, '#fff'], [0.37037037037037035, 'red'], [0.4074074074074074, 'red'], [0.4074074074074074, 'green'], [0.4444444444444444, 'green'], [0.4444444444444444, 'green'], [0.48148148148148145, 'green'], [0.48148148148148145, '#fff'], [0.5185185185185185, '#fff'], [0.5185185185185185, '#fff'], [0.5555555555555556, '#fff'], [0.5555555555555556, 'orange'], [0.5925925925925926, 'orange'], [0.5925925925925926, '#fff'], [0.6296296296296295, '#fff'], [0.6296296296296295, 'red'], [0.6666666666666665, 'red'], [0.6666666666666666, 'orange'], [0.7037037037037037, 'orange'], [0.7037037037037037, 'orange'], [0.7407407407407407, 'orange'], [0.7407407407407407, '#fff'], [0.7777777777777777, '#fff'], [0.7777777777777777, 'green'], [0.8148148148148147, 'green'], [0.8148148148148148, 'blue'], [0.8518518518518519, 'blue'], [0.8518518518518519, '#fff'], [0.8888888888888888, '#fff'], [0.8888888888888888, 'blue'], [0.9259259259259258, 'blue'], [0.9259259259259258, '#fff'], [0.9629629629629628, '#fff'], [0.9629629629629629, '#fff'], [1.0, '#fff']];
 	//var the_colorscale = [[0, "orange"], [1, "orange"]];
 	view_block_size = 30;
@@ -685,7 +689,7 @@ function plot_msa_by_plotlyjs(res){
   //grid: {rows: 2, columns: 1, pattern: 'independent'},
   //sliders: sliders,
   //height: "1600px",
-  margin: {l: 150}, // 左侧(1即left)margin(px)
+  margin: {l: fig_left_margin}, // 左侧(1即left)margin(px)
   xaxis: {
     range: [-0.5, view_block_size +0.5],
     
