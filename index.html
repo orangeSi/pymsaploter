@@ -6,8 +6,11 @@
 	
 	<!-- 
 	ChangeLog:
-		2022-07-14:
-	
+		2022-08-04:
+
+        todo:
+		 1.蛋白全长水平的domain regeion 区域 或者 template蛋白的二级结构注释(来自https://hub.0z.gs/YuLab-SMU/ggmsa/issues/47)
+		 2.输入一小段蛋白序列(支持js的正则表达式)，在template中搜索和定位这段序列的位置，比如在5个不同位置都搜索到这段序列，则把这5个位置作为一个新的track data展示（相当在整个蛋白长度水平上高亮这5个位置），同时也展示这5个位置的信息作为一列（5行），每行表示一个match的位置都可以点击后使用plot_jump_to_x()函数和起始位置坐标 来跳转到对应的match区域。
 	-->
 </head>
 
@@ -664,8 +667,10 @@ function plot_msa_by_plotlyjs(res){
   };
 
 
+	
 
-	// todo: 蛋白全长水平的domain regeion 区域
+
+	// todo: 蛋白全长水平的domain regeion 区域 或者 template蛋白的二级结构注释(来自https://hub.0z.gs/YuLab-SMU/ggmsa/issues/47)
 	var data4 = {
 	x: [0.5, 2, 3, 5, 9.5], // 把蛋白上每个domain实际的区域转化为msa中的坐标！
 	y: [1, 1, 1, 1, 1],
