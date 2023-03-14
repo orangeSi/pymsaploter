@@ -1,23 +1,33 @@
 <html>
 <head>
 	<!-- Load plotly.js into the DOM -->
+<<<<<<< HEAD
+	<!--<script src='https://cdn.plot.ly/plotly-2.12.1.min.js'></script> -->
+	<script src='./plotly-2.12.1.min.js'></script> 
+=======
 	<script src='https://cdn.plot.ly/plotly-2.12.1.min.js'></script> 
 	<!-- <script src='./plotly-2.12.1.min.js'></script> -->
+>>>>>>> a2d23b481b40e777c80737c2f8259be172979eb4
 	
 	<!-- 
 	ChangeLog:
-		2022-08-04:
-
-        todo:
-		 1.蛋白全长水平的domain regeion 区域 或者 template蛋白的二级结构注释(来自https://hub.0z.gs/YuLab-SMU/ggmsa/issues/47)
-		 2.输入一小段蛋白序列(支持js的正则表达式)，在template中搜索和定位这段序列的位置，比如在5个不同位置都搜索到这段序列，则把这5个位置作为一个新的track data展示（相当在整个蛋白长度水平上高亮这5个位置），同时也展示这5个位置的信息作为一列（5行），每行表示一个match的位置都可以点击后使用plot_jump_to_x()函数和起始位置坐标 来跳转到对应的match区域。
+		2023-02-15: 
+			1.增加根据序列id名称来过滤序列，即名称匹配上的就不参与画图。
+			2.增加根据序列id排序的功能，这样方便id相似的序列画在一起。
+	
 	-->
+	<style>
+		body { font-size: 100%}
+		p,textarea {margin-bottom: 2px }
+	</style>
 </head>
 
 <body>
 
- <p>输入fasta格式的MSA序列: <input type="button" onclick="clear_msa()" value="Clear Current sMSA" /></p>
- <textarea id="msa" name="msa" rows="20" cols="100">
+
+
+ <p>输入fasta格式的MSA序列(<tspan id="seq_number"></tspan>): <input type="button" onclick="clear_msa()" value="Clear Current sMSA" /></p>
+ <textarea id="msa" name="msa" rows="20" cols="100" onchange="set_template()">
 >UrCas13d-HA
 -----------MAKKNKMKPRELREAQKKARQL--KAAEINNNAAPA--IAAMPAAEVIA
 PAAEKKKSSVKAAGMKSILV---SENKMYITSFGKGNSAVLEYEVDN-------NDYNQT
@@ -219,14 +229,58 @@ LTVVRELKEYIGDI-------CTVDSYFSIYHYVMQRCITKRENDTKQEEKIKYE--DDL
 LKNHGYT-------KDFVKALNSPFGYNIPRFKNLSIEQLFDR--NEYLTEK--------
 --------------
 </textarea>
-<input type="button" onclick="plot_msa()" value="Plot!" />
+<br>
+按照序列名称进行排序: <input type="checkbox" id="if_sort_seq_name" >
+<br>
+对序列名称做关键字匹配: <input type="text" id="seq_name_match_keyword" value="" placeholder="支持regex" > <tspan id="seq_num_after_filter"></tspan>
+<br>
+<input type="button" onclick="plot_msa(false,false, this, this.value, '开始画图!')" value="开始画图Plot!" style="margin-top:5px" />
+<br>
+<br>
+<br>
+
+<label for="templateid-select" >蛋白模板id:</label>
+<select name="templateid" id="templateid-select" onchange="change_template_id(this)">   
+</select>
+
+<br>
+<br>
+<p id="region_annotation">可选：<tspan class="template_id"></tspan>基于起始和终止位置的注释信息：<input type="button" onclick="plot_msa(true, false, this, this.value, '添加注释!')" value="添加如下注释！" style="margin-top:5px" /> </p>
+<textarea id="region_info" name="ssp" rows="5" cols="100" placeholder="10&#09;50&#09;xx&#10;80&#09;120&#09;yy&#10;">
+</textarea>
+<br>
+<br>
+
+<!--
+<p >可选：<tspan class="template_id"></tspan>fasta格式的二级结构注释: <input type="button" onclick="" value="添加如下注释！" style="margin-top:5px" /></p>
+<textarea id="ssp" name="ssp" rows="2" cols="100">
+</textarea>
+<br>
+<br>
+-->
+
+
+<p >可选：<tspan class="template_id"></tspan>搜索序列motif: <input type="button" onclick="search_motif('motif_kw')" value="搜索motif！" style="margin-top:5px" /> <tspan style="display: none" id="motif_match_number"></tspan> </p>
+<textarea id="motif_kw" name="ssp" rows="1" cols="100" placeholder="NGG" >
+</textarea>
+<br>
+<select  id="motif_match_result"  style="display: none" onchange="plot_jump_to_x(this.value)">   
+</select>
+
+
+<br>
+<br>
+
+
  
 <br><br>
-<input type="button" onclick="plot_jump_to_x(1)" value="(msa mastrix coordinate)jump to" /> <input type="number" id="jump_pos_start" /><text>bp</text>
+<input type="button" onclick="plot_jump_to_x(-2)" id="jump_pos_of_template_id" value="跳转到(first sequence as template coordinate)jump to" /> <input type="number" id="jump_pos_start2" value="1" /><text>bp</text>
 <br><br>
-<input type="button" onclick="plot_jump_to_x(2)" value="(first sequence as template coordinate)jump to" /> <input type="number" id="jump_pos_start2" /><text>bp</text>
+<input type="button" onclick="plot_jump_to_x(-1)" value="跳转到(msa mastrix coordinate)jump to" /> <input type="number" id="jump_pos_start" value="1" /><text>bp</text>
 <br><br>
-<input type="button" onclick="plot_msa()" value="set margin of sequence name region" /> <input type="number" id="seq_name_left_margin" value="200" /><text>px</text>
+
+<input type="button" onclick="change_fig_left_margin()" value="修改序列名称长度到set margin of sequence name region" /> 
+<input type="number" id="seq_name_left_margin" value="300" /><text>px</text>
 
 
 <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
@@ -239,6 +293,79 @@ LKNHGYT-------KDFVKALNSPFGYNIPRFKNLSIEQLFDR--NEYLTEK--------
 	
 window.data = [];
 window.layout = {};
+window.msa = {};
+window.regions_data = "";
+
+// 搜索序列motif
+function search_motif(aid){
+	var motif = document.getElementById(aid).value;
+	if(motif == ""){
+		alert("报错：待搜索的motif序列为空！");
+		return 1;
+	}
+	console.log("motif="+motif);
+	
+	if(Object.keys(window.msa).length ==  0 ){
+		var msa_str = document.getElementById("msa").value;
+		var msa = read_fasta(msa_str);
+		window.msa  = change_msa_seq_order(msa);
+	}
+	var template_id = document.getElementById("templateid-select").value;
+	var motifs = find_all_motifs(window.msa[template_id], motif); // return [[ start, end ],[start, end ]]
+	var motif_match_number = document.getElementById("motif_match_number");
+	motif_match_number.style.display = "block";
+	motif_match_number.innerHTML="搜到 "+Object.keys(motifs).length+" 个匹配结果！";
+	if(Object.keys(motifs).length == 0 ){
+		alert("搜索不到motif "+motif+" !")
+		return 0;
+	}
+	
+	if(Object.keys(motifs).length == 1){
+		var s=motifs[0][0];
+		if(s==0){s = 1}
+		console.log("s="+s);
+		plot_jump_to_x(s);
+	}
+	
+	
+	var a = document.getElementById(aid);
+	var p = document.getElementById('motif_match_result');
+	p.style.display = "block";
+	p.innerHTML = "";
+	
+	//var match_list = document.createElement("")
+	for(var i=0; i < motifs.length; i++){
+		var s = motifs[i][0];
+		var e = motifs[i][1];
+		var s_msa = window.pos_from_seq_to_msa[s];
+		var e_msa = window.pos_from_seq_to_msa[e];
+		console.log("s="+s+" e="+e);
+		console.log("s_msa="+s_msa+" e_msa="+e_msa);
+		var option = document.createElement('option');
+		option.value=s;
+		option.text= s+1 +" to "+e; // 1-based
+		p.appendChild(option);
+		
+		// plot_jump_to_x(s)
+	}
+	a.parentNode.insertBefore(p, a.nextSibling);
+	
+	
+}
+
+function find_all_motifs(seq, motif){ // return [[ start, end, match],[start, end, match]]
+	var seq = seq.replace(/\s/g, "").replace(/-/g, ""); // 去除msa的template序列中的gap
+	var p = RegExp(motif, 'g');
+	
+	var indexPairs = []; // start is 0-based like bed format
+
+	while (null !== (matchArr = p.exec(seq))) { // 在template序列中搜索所有 motif的位置
+		indexPairs.push([matchArr.index, p.lastIndex]);
+	}
+
+	console.log(indexPairs); // output: [9, 12], [19, 22], [29, 32]
+	return indexPairs;
+}
 
 function plot_jump_to_x(e){
 	var xstart = 0;
@@ -246,11 +373,14 @@ function plot_jump_to_x(e){
 	var xrange = window.layout.xaxis.range;
 	xrange_unit = xrange[1]-xrange[0]; // 计算xaxis的range长度
 	
-	if(e == 1){ // msa坐标
+	if(e == -1){ // msa坐标
 		console.log(window.layout.xaxis.range);
-		xstart = document.getElementById("jump_pos_start").value; // 输入感兴趣的区域在msa中起始点坐标
-	}else if(e == 2){ // template序列的实际坐标
-		xstart = document.getElementById("jump_pos_start2").value; // 输入感兴趣的区域在msa中起始点坐标
+		xstart = parseInt(document.getElementById("jump_pos_start").value); // 输入感兴趣的区域在msa中起始点坐标
+	}else if(e == -2){ // template序列的实际坐标
+		xstart = parseInt(document.getElementById("jump_pos_start2").value); // 输入感兴趣的区域在msa中起始点坐标
+		xstart = pos_from_seq_to_msa[xstart];
+	}else if(e > 0){ // 如果e大于0，则跳转到template序列的实际坐标e处！
+		xstart = parseInt(e);
 		xstart = pos_from_seq_to_msa[xstart];
 	}else{
 		alert("error: not support plot_jump_to_x for"+e);
@@ -263,16 +393,43 @@ function plot_jump_to_x(e){
 
 }
 
+function change_fig_left_margin(){
+//margin: {l: fig_left_margin}
+	var fig_left_margin = parseInt(document.getElementById("seq_name_left_margin").value); // convert string to int by parseInt 
+	window.layout.margin.l = fig_left_margin;
+	Plotly.relayout('myDiv', window.layout);
+}
+
+
 function clear_msa(){
 	document.getElementById("msa").value = "";
 }
 
-function plot_msa(){
+function plot_msa(plot_regions_flag, plot_second_struct_flag, btn, btn_raw_value, btn_new_value){
+	if(btn_raw_value != "" && btn_new_value != ""){
+		btn.value = btn_new_value;
+		btn.value = btn_new_value;
+		//alert(btn.value);
+		console.log("startt ddddd="+btn.value);
+		
+	}
 	// read msa fasta
 	var msa_str = document.getElementById("msa").value;
 	var msa = read_fasta(msa_str);
+	msa = filter_seq_name(msa);
+	msa = change_msa_seq_order(msa);
+	console.log("msa=");
+	console.log(msa);
 	
+	if(Object.keys(msa).length == 0){ 
+		if(btn_raw_value != "" && btn_new_value != ""){
+			btn.value = btn_raw_value;
+			console.log("end plot: "+btn.value);
+		}
+		return false;
+	}
 	
+	window.msa = msa;
 	
 	// 定义color
 	var colorscale = generate_colorscale("clustal");
@@ -281,8 +438,11 @@ function plot_msa(){
 	
 	//自定义template
 	var pseq_name_list = Object.keys(msa);
+	console.log("pseq_name_list=");
+	console.log(pseq_name_list);
 	if(pseq_name_list.length == 0){
 		alert("error: msa is null ?");
+		return false;
 	}
 	var template_pid = pseq_name_list[0]; // 暂时定义第一条序列作为msa的template
 	var y_len = pseq_name_list.length;
@@ -306,6 +466,7 @@ function plot_msa(){
 				}
 			}else{
 				alert("error: get two template_pid="+template_pid+" ?");
+				return false;
 			}
 		
 		}else if(!pfa_dict.hasOwnProperty(p_index)){
@@ -316,6 +477,8 @@ function plot_msa(){
 		}else{
 			alert("error: bug here");
 		}
+		console.log("pid="+pid);
+		console.log("pseq="+pseq);
 		if (! x_lens.includes(pseq.length)){
 			x_lens.push(pseq.length);
 		}
@@ -329,10 +492,13 @@ function plot_msa(){
 		console.log(msa);
 		console.log(x_lens);
 		alert("error: x_lens.length="+x_lens.length);
+		return false;
 	}
 	
 	
 	pseq_name_list.push(template_pid); // template_pid 作为msa matrix的第一行！
+	console.log("pseq_name_list2=");
+	console.log(pseq_name_list);
 	var ytickval = [...Array(y_len).keys()];
 	
 	// msa每个位点的top频率
@@ -343,7 +509,7 @@ function plot_msa(){
 	
 	// 定义 pos_from_seq_to_msa
 	for(var i=0; i< template_seq.length; i++){
-		var real_i = template_seq.slice(0,i+1).replaceAll("-", "").length
+		var real_i = template_seq.slice(0,i+1).replaceAll("-", "").length;
 		if(pos_from_seq_to_msa.hasOwnProperty(real_i)){continue}
 		pos_from_seq_to_msa[real_i] = i;
 	}
@@ -388,8 +554,9 @@ function plot_msa(){
 			
 		    var z = get_z_for_colorscale(text, colorscale);
 			z_line.push(z);
-			var template_x = get_template_x(x, template_seq);
-			template_x_list.push(template_x);
+			var template_x = get_template_x(x, template_seq);// teamplate在[0,x]之间不包括gap的长度即template_x;
+			var current_x = get_template_x(x, pfa_dict[y]);
+			template_x_list.push([template_x, current_x, pseq_name_list[y]]);
 
 		});
 		zlist.push(z_line);
@@ -418,11 +585,18 @@ function plot_msa(){
 	console.log(res);
 	
 	// start plot now!
-	window.data, window.layout = plot_msa_by_plotlyjs(res);
+	window.data, window.layout = plot_msa_by_plotlyjs(res, plot_regions_flag, plot_second_struct_flag);
 	
 	
 	console.log("msa:");
 	console.log(msa);
+	alert("ok");
+	if(btn_raw_value != "" && btn_new_value != ""){
+		btn.value = btn_raw_value;
+		console.log("end plot:"+btn.value);
+		
+	}
+	return true;
 }
 
 function get_template_x(x, template_seq){ // x is 0-based
@@ -547,6 +721,120 @@ for (var j = 0; j < t; j++){
  }
 }
 
+// sort dict的key, 加了reverse()就变成从大到小排序了!
+	function sortObj(obj) {
+	  return Object.keys(obj).sort().reverse().reduce(function (result, key) {
+		result[key] = obj[key];
+		return result;
+	  }, {});
+	}
+
+//根据序列名称进行选择过滤
+function filter_seq_name(msa){
+	var seq_name_match_keyword = document.getElementById("seq_name_match_keyword").value;
+	var template_id = document.getElementById("templateid-select").value;
+	var seq_num_after_filter_num = "";
+	var new_msa={};
+		
+	if (seq_name_match_keyword == ""){
+		new_msa = msa;
+	}else{
+	
+		var pat = new RegExp(seq_name_match_keyword, "i"); // i mean ignore case
+		for (const [key, value] of Object.entries(msa)) {
+			if(! (pat.exec(key) || key == template_id) ) continue;
+			new_msa[key] = msa[key];
+		}
+	
+		if(Object.keys(new_msa).length == 0){
+			alert("error: 根据序列过滤后为空！");
+		}
+	}
+	seq_num_after_filter_num = Object.keys(new_msa).length;
+	document.getElementById("seq_num_after_filter").innerHTML = "一共"+Object.keys(new_msa).length+"条蛋白序列!";
+	msa = {};
+	return new_msa;
+}
+
+// 修改画图的序列的顺序，把<select>选中的作为template即画图msa的第一行！
+function change_msa_seq_order(msa){
+	var template_id = document.getElementById("templateid-select").value;
+	var if_sort_seq_name = document.getElementById("if_sort_seq_name").checked;
+	console.log("if_sort_seq_name:");
+	console.log(if_sort_seq_name);
+	
+	if(if_sort_seq_name){
+		msa = sortObj(msa);
+		console.log("after sort:");
+		console.log(Object.keys(msa));
+	}
+	
+	if(Object.keys(msa)[0] == template_id){ // 第一个key作为template
+		return msa;
+	}
+	
+	
+	
+	// 把template作为第一个key
+	var new_msa = {};
+	new_msa[template_id] = msa[template_id];
+	for (const [key, value] of Object.entries(msa)) {
+		if(key == template_id ) continue;
+		new_msa[key] = msa[key];
+	}
+	console.log("new_msa:");
+	console.log(Object.keys(new_msa));
+	msa = {};
+	return new_msa;
+}
+
+
+function change_template_id(e){
+	var new_choosen = e.value;
+	var template_ids = document.getElementsByClassName("template_id");
+	for (let i = 0; i < template_ids.length; i++) {
+		template_ids[i].innerHTML= "模板"+new_choosen+" ";
+	}
+	document.getElementById("jump_pos_of_template_id").value= "跳转到 "+new_choosen+ " jump to " ;
+	plot_msa(false,false, "", "", "");
+}
+
+// 设置默认的template id 并且检查msa的序列长度是否一致！
+function set_template(){
+	var msa_str = document.getElementById("msa").value;
+	var msa = read_fasta(msa_str);
+	var default_template_id = Object.keys(msa)[0];
+	var seq_number = Object.keys(msa).length;
+	document.getElementById('seq_number').innerHTML=" 如下一共"+seq_number+"条序列 ";
+	
+	
+	var p = document.getElementById("templateid-select");
+	p.innerHTML = "";
+	var error="";
+	var seq_len_dict = {};
+	for (const [key, value] of Object.entries(msa)) {
+		var option = document.createElement('option');
+		option.value=key;
+		option.text=key;
+		p.appendChild(option);
+		seq_len_dict[value.length]="";
+	}
+	
+	if(Object.keys(seq_len_dict).length != 1){
+		alert("报错：输入msa的序列长度不一样，请修改~");
+		console.log("Object.keys(seq_len_dict)="+Object.keys(seq_len_dict));
+		return false;
+	}
+	
+	var template_ids = document.getElementsByClassName("template_id");
+	for (let i = 0; i < template_ids.length; i++) {
+		template_ids[i].innerHTML= "模板"+default_template_id+" ";
+	}
+	
+	document.getElementById("jump_pos_of_template_id").value= "跳转到 "+default_template_id+ " jump to " ;
+	console.log(document.getElementById("templateid-select"));
+}
+
 
 function read_fasta(lines){
 	var res = {};
@@ -570,12 +858,16 @@ function read_fasta(lines){
 		var cid=e_arr[0];
 		var cseq=e_arr.slice(1).join("").replace(/\s/g, "");
 		if(!( cid.match(/.*\S.*/) )){
-			alert("error:"+e);
-			return res;
+			alert("error: id 格式错误? "+e);
+			return {};
 		}
 		if(!( cseq.match(/\S+/) )){
-			alert("error:"+e);
-			return res;
+			alert("error: 序列内包括空格? "+e);
+			return {};
+		}
+		if(Object.keys(res).includes(cid)){
+			alert("error: 遇到重复的 id -> "+ cid);
+			return {};
 		}
 		res[cid] = cseq;
 		
@@ -585,7 +877,92 @@ function read_fasta(lines){
 }
 
 
-function plot_msa_by_plotlyjs(res){
+function get_regions(){
+	var rg_x = [];
+	var rg_y = [];
+    var	rg_width = [];
+	var customdata = [];
+	
+	if(Object.keys(window.msa).length == 0 ){
+		console.log("here");
+		var msa_str = document.getElementById("msa").value;
+		var msa = read_fasta(msa_str);
+		window.msa = change_msa_seq_order(msa);
+	}
+	
+	var default_template_id = Object.keys(window.msa)[0];
+	
+	var region_info = document.getElementById("region_info").value;
+	console.log("region_info="+region_info);
+	var arr = region_info.split("\n");
+	var rgs = [];
+	
+	for(var i=0; i< arr.length; i++){
+		var line = arr[i].split(/\s+/);
+		if(line.length < 3){continue}
+		var s = parseInt(line[0]);
+		var e = parseInt(line[1]);
+		var info = line.slice(2).join(" ");
+		customdata.push(s+"->"+e+": "+info);
+		if(s > e){
+			rgs.push([e, s, info]);
+		}else{
+			rgs.push([s, e, info]);
+		}
+		
+	}
+	
+	
+	//convert regions location to msa location
+	var rgs_msa = [];
+	var template_seq = window.msa[default_template_id];
+	//alert(template_seq);
+	
+	for(var j=0; j < rgs.length; j ++){
+		var s = rgs[j][0];
+		var e = rgs[j][1];
+		var s_msa = 0;	
+		var e_msa = 0;
+		console.log("s="+s);
+		console.log("e="+e);
+		var tindex = 0;
+		var tbase = template_seq.split("");
+		
+		for(var i=0; i< tbase.length; i++){
+			if(tbase[i] != '-'){ tindex ++}
+			if(tindex == s){
+				s_msa = i +1;
+			}
+			if(tindex == e){
+				e_msa = i +1;
+			}
+		}
+		
+		console.log("s2="+s_msa);
+		console.log("e2="+e_msa);
+		if(s_msa == 0){
+			alert("error: s_msa")
+		}
+		if(e_msa == 0){
+			alert("error: e_msa")
+		}
+		
+		rg_x.push( (s_msa+e_msa)/2 -1 );
+		rg_y.push(1);
+		rg_width.push(e_msa - s_msa + 1);
+		
+	}
+		
+	
+	
+	// convert start and end to x and width of barplot
+	console.log(rgs);
+	return [rg_x, rg_y, rg_width, customdata];
+}
+
+
+
+function plot_msa_by_plotlyjs(res, plot_regions_flag, plot_second_struct_flag){
 	//var jsonResult="{'x': [1,2,3,1,2,3], 'y':['A','M','W','X','N','W'], 'z':[0.1,0.1,0.8,0.1,0.1,0.1], 'template_x':['1','2','3','1','2','3']}";
 	//var res = JSON.parse(jsonResult);
 	//var res={'msa_len': 200, 'x': [0, 1, 2, 0, 1, 2], y: [0, 0, 0, 1, 1, 1], 
@@ -624,7 +1001,7 @@ function plot_msa_by_plotlyjs(res){
   text: text,
   type: 'scattergl',
   customdata: template_x,
-  hovertemplate: "<br>%{text} at <b>%{customdata}</b> of "+ template_pid +", %{x}+1 off the whole msa",
+  hovertemplate: "<br> %{text} at %{customdata[0]} of "+template_pid +"<br>        %{customdata[1]} of <b>%{customdata[2]}</b><br>        %{x}+1 of the whole msa  <extra></extra>",
   //hovertemplate: "<br>myth %{x}: %{y}  %{customdata}",
   //hovertemplate: "<extra>%{fullData.customdata}</extra>",
   //xaxis: 'x', // 默认就是x
@@ -667,33 +1044,21 @@ function plot_msa_by_plotlyjs(res){
   };
 
 
+
 	
-
-
-	// todo: 蛋白全长水平的domain regeion 区域 或者 template蛋白的二级结构注释(来自https://hub.0z.gs/YuLab-SMU/ggmsa/issues/47)
-	var data4 = {
-	x: [0.5, 2, 3, 5, 9.5], // 把蛋白上每个domain实际的区域转化为msa中的坐标！
-	y: [1, 1, 1, 1, 1],
-	width: [2, 1, 1, 3, 6],
-	customdata: ["xx->yy","xx->yy","xx->yy","xx->yy","xx->yy"],
-	hovertemplate: "xx: %{customdata}", // 定制hover 内容
-	ymin: 0,
-    ymax: 1,
-    type: 'bar',
-	xaxis: 'x', // 默认是x。即data4和data1公用一个x轴。
-	yaxis: 'y4', // 默认是y。
-	marker:{
-		color: ["green", "black", "red", "yellow", "blue"],
-	},
-	opacity: 0.8, // 这个trace的整体颜色透明度。
+	var layout_height = 200 + pseq_name_list.length * 50;
+	var	yaxis3_domain = [0, 100/layout_height];
 	
-}
-
-
+	var yaxis_domain = [100/layout_height+50/layout_height, 0.9];
+	
+	
 	layout = {
   //grid: {rows: 2, columns: 1, pattern: 'independent'},
   //sliders: sliders,
   //height: "1600px",
+  autosize: false,
+  height: layout_height,
+  width: window.screen.availWidth*0.95,
   margin: {l: fig_left_margin}, // 左侧(1即left)margin(px)
   xaxis: {
     range: [-0.5, view_block_size +0.5],
@@ -724,14 +1089,14 @@ function plot_msa_by_plotlyjs(res){
     scaleanchor: "x", // xy比例对齐
     scaleratio: 1,
 	
-	domain: [0.35, 0.9],
+	domain: yaxis_domain, // [0.35, 0.9],
     },
 	
 	xaxis3: {
 			constraintoward: "left", // x轴左对齐
 			},
 	yaxis3: {
-		domain: [0, 0.2],
+		domain: yaxis3_domain, //[0, 0.2],
 		
 	},
 	xaxis4: {
@@ -742,21 +1107,83 @@ function plot_msa_by_plotlyjs(res){
 		showticklabels: false, // 隐藏y轴tick
 		
 	},
+	
+	shapes: [
+    {
+      type: 'rect',
+      x0: 0,
+      y0: 0,
+      x1: 0,
+      y1: 0,
+      line: {
+        color: 'rgba(128, 0, 128, 1)'
+      }
+    }
+     ]
   
   
   }
 
 // window.myDiv = document.getElementById('myDiv'); myDiv.on('plotly_click', function(eventdata){{  window.eventdata = eventdata}});
   
- 
 
-//data = [data2, data1, data3];
-data = [data4, data3, data2, data1]; // 最后画data1，这样data1就在data2上方，不会被data2盖住。
+var data = []; 
+
+if(plot_regions_flag){
+	// todo: template蛋白全长水平的domain region 区域  或者 template蛋白的二级结构注释(来自https://hub.0z.gs/YuLab-SMU/ggmsa/issues/47)
+	var rgs = get_regions();
+	var rg_x = rgs[0];
+	var rg_y = rgs[1];
+	var rg_width = rgs[2];
+	var customdata = rgs[3];
+	
+	console.log("start:")
+	console.log(rg_x);
+	console.log(rg_y);
+	console.log(rg_width);
+	console.log("end:")
+	var color = ["green", "black", "red", "yellow", "blue"];
+	while(rg_width.length > color.length){
+		color = color.concat(color);
+	}
+	
+	var data4 = {
+	x: rg_x, // 把蛋白上每个domain实际的区域转化为msa中的坐标！[]
+	y: rg_y, // []
+	width: rg_width, // []
+	customdata: customdata,
+	hovertemplate: "蛋白坐标: %{customdata}", // 定制hover 内容
+	ymin: 0,
+    ymax: 1,
+    type: 'bar',
+	xaxis: 'x', // 默认是x。即data4和data1公用一个x轴。
+	yaxis: 'y4', // 默认是y。
+	marker:{
+		color: color,
+	},
+	opacity: 0.8, // 这个trace的整体颜色透明度。
+	
+	}
+	data.push(data4);
+}
+
+
+
+//data = [data4, data3, data2, data1]; 
+data.push(data3, data2, data1 ); // 最后画data1，这样data1就在data2上方，不会被data2盖住。
+
 Plotly.newPlot('myDiv', {data:data, layout:layout}); 
 
 
 // 跳转到指定开始位置
 return data, layout;
+}
+
+
+window.onload = function(){  
+	// 设置默认的template 
+	set_template();
+	
 }
 
 
@@ -1029,3 +1456,4 @@ LKNHGYT-------KDFVKALNSPFGYNIPRFKNLSIEQLFDR--NEYLTEK--------
 </body>
 
 </html>
+
